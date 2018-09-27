@@ -122,7 +122,7 @@ class misc:
     async def tofoot(self, ctx, m:float):
         """Converts centimetres into feet and inches"""
         a = m//30.48
-        b = round((m *0.39 - a*12), 1)
+        b = round((m/2.54 - a*12), 1)
         await ctx.send(embed = await xembed(ctx.author.display_name , "{}cm is approximately {}'{}''".format(m,int(a),int(b))))
 
     @commands.command()
@@ -149,7 +149,7 @@ class misc:
         """Information about the bot """
         embed = discord.Embed(title="KittyBot5000", description="Cutest bot you'll ever meet :3", color=0xb40a78)
         embed.add_field(name="Author", value="Nyathaleen#3995")
-        embed.add_field(name="Server count", value=f"{len(bot.guilds)}")
+        embed.add_field(name="Server count", value=f"{len(self.bot.guilds)}")
         embed.add_field(name="Favourite food:", value="Sushi, obviously")
         await ctx.send(embed = embed)
 

@@ -26,7 +26,9 @@ async def on_ready():
 
 
 def Main():
-    bot.run("MjYwNzIxMTg1MzAwNDE0NDY0.DnQo9g.BXdbG7PyIT_4qj5txJx2dwS4vyM")
+    with open('important.txt', "r") as f:
+        token =  ast.literal_eval(f.read())
+    bot.run(token)
 
 if __name__ == "__main__":
     Main()
