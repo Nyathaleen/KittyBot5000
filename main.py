@@ -7,7 +7,7 @@ from os import listdir
 from os.path import isfile, join
 
 bot = commands.Bot(command_prefix = "-", case_insensitive=True)
-
+bot.remove_command("help")
 async def loadCogs():
     for extension in [f.replace(".py", "") for f in listdir("cogs") if isfile(join("cogs", f))]:
         try:
