@@ -3,14 +3,15 @@ from discord.ext import commands
 import asyncio
 import random
 import ast
+
 class quiz:
     def __init__(self, bot):
         self.bot = bot
         self.quez = ""
         self.questions = ["Vad är bäst?","Who is the creator of KittyBot5000?", "How many cats does the creator of the bot have?", "If you find a waffle on the ground would you:","När äter Liam våfflor?"]
-        self.options ={"Vad är bäst?":["hundar", "katter", "Liam", "chocklad"],"Who is the creator of KittyBot5000?":["Starwort", "Uncappingprism", "Liam", "Nyathaleen"],"How many cats does the creator of the bot have?":["1","2","3","4"],
+        self.options ={"Vad är bäst?":["hundar", "katter", "Liam", "choklad"],"Who is the creator of KittyBot5000?":["Starwort", "Uncappingprism", "Liam", "Nyathaleen"],"How many cats does the creator of the bot have?":["1","2","3","4"],
          "If you find a waffle on the ground would you:":["Not eat it", "Eat it if it has maple syrup", "Eat it if it's clean", "Eat it"], "När äter Liam våfflor?":["Annandag våffel", "Julafton", "Varje dag", "På våffeldagen hemma hos mormor klockan tre"],}
-        self.answer = {"Vad är bäst?":"chocklad","Who is the creator of KittyBot5000?":"Nyathaleen","How many cats does the creator of the bot have?":"3", "If you find a waffle on the ground would you:":"Eat it if it has maple syrup","När äter Liam våfflor?":"På våffeldagen hemma hos mormor klockan tre"}
+        self.answer = {"Vad är bäst?":"choklad","Who is the creator of KittyBot5000?":"Nyathaleen","How many cats does the creator of the bot have?":"3", "If you find a waffle on the ground would you:":"Eat it if it has maple syrup","När äter Liam våfflor?":"På våffeldagen hemma hos mormor klockan tre"}
 
     @commands.command()
     async def quiz(self, ctx):
