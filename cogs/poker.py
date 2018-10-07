@@ -9,20 +9,24 @@ suitsdict = {"Diamonds":1, "Hearts":2, "Spades":3, "Clubs":4}
 cardnums = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King"]
 cardnumsdict= {"Two":2, "Three":3, "Four":4, "Five":5, "Six":6, "Seven":7, "Eight":8, "Nine":9, "Ten":10, "Jack":11, "Queen":12, "King":13, "Ace":14}
 
+
+def save():
+    with open('bank.json', 'w') as f:
+        f.write(repr(bank))
+
+def load():
+    global bank
+    with open('bank.json', "r") as f:
+        bank =  ast.literal_eval(f.read())
+
 class poker:
     def __init__(self, bot):
         self.bot = bot
-        with open('bank.json', "r") as f:
-            self.bank =  ast.literal_eval(f.read())
-
-    async def save():
-        with open('bank.json', 'w') as f:
-            f.write(repr(obj.bank))
-
 
     @commands.command()
     async def phost(self, ctx, monies:int = 100):
         """host game of poker"""
+        load()
         self.pokergame = {}
         self.pokergame["users"] = {}
         self.pokergame["pot"] = 0
@@ -30,8 +34,8 @@ class poker:
         self.puser = []
         id = ctx.message.author.id
         if monies >= 100:
-            if id in self.bank:
-                if monies > self.bank[id]["money"]:
+            if id in bank:
+                if monies > bank[id]["money"]:
                     await ctx.send("You can't afford to participate")
                 else:
                     self.players.append(id)
@@ -40,7 +44,7 @@ class poker:
                     self.pokergame["users"][id]["ucards"] = []
                     self.pokergame["users"][id]["status"] = ""
                     self.pokergame["users"][id]["markers"] = monies*4
-                    self.bank[id]["money"] -= monies
+                    bank[id]["money"] -= monies
                     await ctx.send("You pay {}$ and get {} markers".format(monies, monies*4))
                     self.pokergame["users"][id]["turn"] = "yes"
                     self.pokergame["users"][id]["bet"] = 0
@@ -50,7 +54,7 @@ class poker:
                     self.pokergame["globalbet"] = 0
                     await ctx.send("Game starting! use -pjoin to join")
                     self.pmessage = "Game starting"
-                    await self.save()
+                    save()
             else:
                 await ctx.send("You don't own a bank account!")
         else:
@@ -60,10 +64,11 @@ class poker:
     @commands.command()
     async def pjoin(self, ctx, monies:int = 100):
         """join hosted game of poker"""
+        load()
         id = ctx.message.author.id
         if monies >= 100:
-            if id in self.bank:
-                if monies > self.bank[id]["money"]:
+            if id in bank:
+                if monies > bank[id]["money"]:
                     await ctx.send("You can't afford to participate")
                 else:
                     self.players.append(id)
@@ -72,13 +77,13 @@ class poker:
                     self.pokergame["users"][id]["ucards"] = []
                     self.pokergame["users"][id]["status"] = ""
                     self.pokergame["users"][id]["markers"] = monies*4
-                    self.bank[id]["money"] -= monies
+                    bank[id]["money"] -= monies
                     await ctx.send("You pay {}$ and get {} markers".format(monies, monies*4))
                     self.pokergame["users"][id]["turn"] = "no"
                     self.pokergame["users"][id]["bet"] = 0
                     self.pokergame["users"][id]["check"] = 0
                     self.pokergame["users"][id]["hand"] = {}
-                    await self.save()
+                    save()
                     await ctx.send("{} has joined the poker game, use -pstart when ready to start".format(ctx.author.display_name))
             else:
                 await ctx.send("You don't own a bank account!")
@@ -193,15 +198,16 @@ class poker:
     @commands.command()
     async def quit(self, ctx):
         """Leave game and exchange markers"""
+        load()
         id = ctx.message.author.id
         if id in self.pokergame["users"]:
             self.players.remove(id)
             self.puser.remove(id)
             a = self.pokergame["users"][id]["markers"]
-            self.bank[id]["money"] += round(a/4)
+            bank[id]["money"] += round(a/4)
             await ctx.send("{} has left the game! They exchanged their markers for {}$".format(ctx.message.author, round(a/4)))
             del self.pokergame["users"][id]
-            await self.save()
+            save()
         else:
             await ctx.send("You're not in the game")
 
@@ -239,14 +245,6 @@ class poker:
         else:
             await ctx.send("It's not your turn!")
         await ctx.message.delete()
-
-    @commands.command()
-    async def testeroo(self, ctx):
-        self.pokergame["table"] = ["Two of Spades", "Three of Spades", "Four of Spades", "Five of Spades", "Jack of Hearts"]
-        self.pokergame["users"][ctx.message.author.id]["ucards"] = ["Six of Spades","Queen of Diamonds"]
-        await self.reveal(ctx)
-        await ctx.send(self.pokergame)
-
 
     async def nextturn(self, ctx, arg):
         """Switches turn to someone else and looks if everyone has checked. Also reveals communitycards"""
@@ -347,10 +345,13 @@ class poker:
             for bk in self.pokergame["users"][z]["hand"]["card"]:
                 self.pokergame["users"][z]["result2"] += bk
         await self.pokerwin(ctx)
+        await self.killoff(ctx)
+        await self.pokerend(ctx)
 
 
     async def pokerend(self, ctx):
         """ends the round and checks if there is a winner"""
+        load()
         self.pokergame["users"][self.players[0]]["turn"] = "yes"
         self.pokergame["carderino"] = 0
         for z in self.players:
@@ -363,13 +364,13 @@ class poker:
         if len(self.players) <= 1:
             await ctx.send("{} is the only person left standing and has won! They exchange their markers for {}$".format(self.bot.get_user(self.players[0]), round(self.pokergame["users"][self.players[0]]["markers"]/3)))
             wa = self.pokergame["users"][self.players[0]]["markers"]
-            self.bank[self.players[0]]["money"] += round(wa/3)
+            bank[self.players[0]]["money"] += round(wa/3)
             self.pokergame = {}
             self.players = []
             self.puser = []
             self.pokergame["users"] = {}
             self.pokergame["pot"] = 0
-            await self.save()
+            save()
         else:
             await ctx.send("Next round starting...")
             await self.startpoker(ctx)
@@ -415,6 +416,7 @@ class poker:
                         suit = suitsdict[k]
                 self.pokergame["users"][z]["hand"]["card"].append(card)
                 self.pokergame["users"][z]["hand"]["suit"].append(suit)
+            self.pokergame["users"][z]["hand"]["card"].sort()
 
     async def pair(self, ctx):
         """looks for pairs in hand"""
@@ -439,11 +441,7 @@ class poker:
         """checks for straight"""
         for z in self.puser:
             self.pokergame["users"][z]["hand"]["straight"] = 0
-            self.pokergame["users"][z]["hand"]["card"].sort
-            if self.pokergame["users"][z]["hand"]["card"][6] == 14:
-                self.pokergame["users"][z]["hand"]["card"].append(1)
-            self.pokergame["users"][z]["hand"]["card"].sort
-            for a in range(1,7):
+            for a in range(1, 7):
                 if self.pokergame["users"][z]["hand"]["card"][a-1] + 1 == self.pokergame["users"][z]["hand"]["card"][a]:
                     if self.pokergame["users"][z]["hand"]["card"][a] + 1 == self.pokergame["users"][z]["hand"]["card"][a+1]:
                         if self.pokergame["users"][z]["hand"]["card"][a+1] + 1 == self.pokergame["users"][z]["hand"]["card"][a+2]:

@@ -7,17 +7,24 @@ import ast
 async def xembed(title, desc):
     return discord.Embed(title=title, description=desc, color=0xb40a78)
 
+def save():
+    with open('bank.json', 'w') as f:
+        f.write(repr(bank))
+
+def load():
+    global bank
+    with open('bank.json', "r") as f:
+        bank =  ast.literal_eval(f.read())
+
 class misc:
     def __init__(self, bot):
         self.bot = bot
-        with open('bank.json', "r") as f:
-            self.bank =  ast.literal_eval(f.read())
 
     @commands.command()
     async def help(self, ctx, page:int = 1):
         if page < 4:
             if page == 1:
-                embed = discord.Embed(title="Basic commands", description="Use -'help 2' to se the next page", colour=0xb40a78)
+                embed = discord.Embed(title="Basic commands", description="Use -'help 2' to see the next page", colour=0xb40a78)
                 embed.add_field(name="Help", value="-help (page). help brings up this page, but you already know that")
                 embed.add_field(name="roll", value="-roll (sides).  Rolls dice, randomly picking a number between 1 and the number of sides")
                 embed.add_field(name="flip", value="-flip [times].  flips a coin the amount of times input")
@@ -31,7 +38,7 @@ class misc:
                 embed.add_field(name="cat", value="-cat. sends a random picture of a cat")
                 embed.add_field(name="dog", value="dog.  sends a random picture of a dog")
             elif page == 2:
-                embed = discord.Embed(title="Currency and jobs", description="Use -'help 3' to se the next page", colour=0xb40a78)
+                embed = discord.Embed(title="Currency and jobs", description="Use -'help 3' to see the next page", colour=0xb40a78)
                 embed.add_field(name="register", value="-register. Registers a bank account. Required for most commands to work")
                 embed.add_field(name="Balance, profile", value="-bal.  Checks the balance of your bank account and shows your current job")
                 embed.add_field(name="work", value="-work. Your primary way of earning money. 10 minute cooldown")
@@ -172,7 +179,8 @@ class misc:
 
     @commands.command()
     async def slots(self, ctx, num:int = 100):
-        if self.bank[ctx.message.author.id]["money"] >= num:
+        load()
+        if bank[ctx.message.author.id]["money"] >= num:
             wl = ""
             amount = num
             slots = ['heart', 'black_heart', 'green_heart', 'purple_heart', 'blue_heart', 'seven']
@@ -188,19 +196,16 @@ class misc:
             else:
                 wl = "lose"
             if wl == "win":
-                self.bank[ctx.message.author.id]["money"] += amount
+                bank[ctx.message.author.id]["money"] += amount
             else:
-                self.bank[ctx.message.author.id]["money"] -= amount
+                bank[ctx.message.author.id]["money"] -= amount
             embed = discord.Embed(title="", description ="You {} {}$".format(wl, amount), color=0xb40a78)
             embed.add_field(name="Results", value="{}".format(slotOutput))
             await ctx.send(embed = embed)
+            save()
         else:
             await ctx.send("You don't have enough money mate, time to stop gambling")
 
-
-    async def save():
-        with open('bank.json', 'w') as f:
-            f.write(repr(obj.bank))
 
 
 def setup(bot):
