@@ -148,7 +148,7 @@ class misc:
     async def info(self, ctx):
         """Information about the bot """
         embed = discord.Embed(title="KittyBot5000", description="Cutest bot you'll ever meet :3", color=0xb40a78)
-        embed.add_field(name="Author", value="Nyathaleen#3995")
+        embed.add_field(name="Author", value="Nyathaleen#0001")
         embed.add_field(name="Server count", value=f"{len(self.bot.guilds)}")
         embed.add_field(name="Favourite food:", value="Sushi, obviously")
         await ctx.send(embed = embed)
@@ -198,9 +198,9 @@ class misc:
             await ctx.send("You don't have enough money mate, time to stop gambling")
 
 
-async def save():
-    with open('bank.json', 'w') as f:
-        f.write(repr(obj.bank))
+    async def save():
+        with open('bank.json', 'w') as f:
+            f.write(repr(obj.bank))
 
 
 def setup(bot):

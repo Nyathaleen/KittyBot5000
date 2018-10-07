@@ -38,59 +38,53 @@ flav = {
 class jobs:
     def __init__(self, bot):
         self.bot = bot
+        with open('bank.json', "r") as f:
+              self.bank =  ast.literal_eval(f.read())
 
-    global bank
-    with open('bank.json', "r") as f:
-          bank =  ast.literal_eval(f.read())
+    async def save():
+        with open('bank.json', 'w') as f:
+            f.write(repr(self.bank))
 
     @commands.command()
     @commands.cooldown(1, 600, commands.BucketType.user)
     async def work(self, ctx):
         """A way of earning money """
         id = ctx.message.author.id
-        if id not in bank:
+        if id not in self.bank:
             await ctx.channel.send(embed = await xembed(ctx.author.display_name,"Get a bank account"))
-        if "job" in bank[id]:
-            j = bank[id]["job"]
+        if "job" in self.bank[id]:
+            j = self.bank[id]["job"]
             a = random.randint(salary[j],salary[j]*2)
-            bank[id]["money"] += a
-            await ctx.channel.send(embed = await xembed(ctx.author.display_name, random.choice(flav[bank[id]["job"]]).format(a)))
-            await save()
+            self.bank[id]["money"] += a
+            await ctx.channel.send(embed = await xembed(ctx.author.display_name, random.choice(flav[self.bank[id]["job"]]).format(a)))
+            await self.save()
         else:
-            bank[id]["job"] = "unemployed"
-
-
+            self.bank[id]["job"] = "unemployed"
 
 
     @commands.command()
     async def register(self, ctx):
         """Register a bank account """
         id = ctx.message.author.id
-        if id not in bank:
-            bank[id] = {}
-            bank[id]["money"] = 100
-            bank[id]["inv"] = {}
-            bank[id]["job"] = "unemployed"
-            bank[id]["power"] = 0
+        if id not in self.bank:
+            self.bank[id] = {}
+            self.bank[id]["money"] = 100
+            self.bank[id]["inv"] = {}
+            self.bank[id]["job"] = "unemployed"
+            self.bank[id]["power"] = 0
             await ctx.send(embed = await xembed(ctx.author.display_name, "Thank you for registering a bank account"))
         else:
             await ctx.send(embed = await xembed(ctx.author.display_name, "You already have an account registered"))
-        await save()
+        await self.save()
 
     @commands.command(aliases=["balance","bal"])
     async def profile(self, ctx):
         """Check the balance of your bank account and your current job"""
         id = ctx.message.author.id
-        if id in bank:
-            await ctx.send(embed = await xembed(ctx.author.display_name,"You have {}$ on your bank account and your current job is {}".format(bank[id]["money"], bank[id]["job"])))
+        if id in self.bank:
+            await ctx.send(embed = await xembed(ctx.author.display_name,"You have {}$ on your bank account and your current job is {}".format(self.bank[id]["money"], self.bank[id]["job"])))
         else:
             await ctx.send(embed = await xembed(ctx.author.display_name, "You do not have a bank account"))
-
-    async def save():
-        with open('bank.json', 'w') as f:
-            f.write(repr(bank))
-
-
 
     @commands.command()
     async def shop(self, ctx):
@@ -105,18 +99,18 @@ class jobs:
         """Buys an item from the shop"""
         id = ctx.message.author.id
         if arg in shopdict:
-            if bank[id]["money"] < shopdict[arg]*num:
+            if self.bank[id]["money"] < shopdict[arg]*num:
                 embed = await xembed(ctx.author.display_name, "You don't have enough money for this item", )
                 ctx.send(embed = embed)
             else:
-                if arg not in bank[id]["inv"]:
-                    bank[id]["inv"][arg] = 0
-                bank[id]["inv"][arg] += 1*num
-                bank[id]["money"] -= shopdict[arg]*num
+                if arg not in self.bank[id]["inv"]:
+                    self.bank[id]["inv"][arg] = 0
+                self.bank[id]["inv"][arg] += 1*num
+                self.bank[id]["money"] -= shopdict[arg]*num
                 await ctx.send(embed = await xembed(ctx.author.display_name, "Thank you {} for purchasing {} {}".format(ctx.author.display_name, num, arg)))
         else:
             await ctx.send(embed = await xembed(ctx.author.display_name, "Sorry, our shop does not sell {}".format(arg)))
-        await save()
+        await self.save()
 
     @commands.command(aliases=["inv"])
     async def inventory(self, ctx):
@@ -124,8 +118,8 @@ class jobs:
         id = ctx.message.author.id
         embed = discord.Embed(title=ctx.author.display_name, description="Your inventory:",color=0xb40a78 )
         for n in shoplist:
-            if n in bank[id]["inv"]:
-                embed.add_field(name="{}".format(n), value="{}".format(bank[id]["inv"][n]))
+            if n in self.bank[id]["inv"]:
+                embed.add_field(name="{}".format(n), value="{}".format(self.bank[id]["inv"][n]))
 
         await ctx.send(embed = embed)
 
@@ -134,16 +128,16 @@ class jobs:
     async def use(self, ctx, item, num:int = 1):
         """Uses item in your inventory"""
         id = ctx.message.author.id
-        if item in bank[id]["inv"]:
-            if bank[id]["inv"][item] >= 1*num:
-                bank[id]["inv"][item] -= 1*num
-                if "power" not in bank[id]:
-                    bank[id]["power"] = 0
-                bank[id]["power"] += (shopdict[item]*num)/10 + shopdict[item]/5
-                await ctx.send(embed = await xembed(ctx.message.author.display_name, "You used {} {} and your power level has increased to {}".format(num, item, bank[id]["power"])))
+        if item in self.bank[id]["inv"]:
+            if self.bank[id]["inv"][item] >= 1*num:
+                self.bank[id]["inv"][item] -= 1*num
+                if "power" not in self.bank[id]:
+                    self.bank[id]["power"] = 0
+                self.bank[id]["power"] += (shopdict[item]*num)/10 + shopdict[item]/5
+                await ctx.send(embed = await xembed(ctx.message.author.display_name, "You used {} {} and your power level has increased to {}".format(num, item, self.bank[id]["power"])))
         else:
             await ctx.send(embed = await xembed(ctx.message.author.display_name, "You don't own any of those"))
-            await save()
+            await self.save()
 
     @commands.command()
     async def jobs(self, ctx):
@@ -153,7 +147,7 @@ class jobs:
         for n in joblist:
             embed.add_field(name="{}".format(n), value="Power level needed {}".format(jobdict[n]))
         await ctx.send(embed = embed)
-        await ctx.send("Your current power level: {}".format(bank[id]["power"]))
+        await ctx.send("Your current power level: {}".format(self.bank[id]["power"]))
 
 
 
@@ -162,17 +156,17 @@ class jobs:
     async def getjob(self, ctx, job):
         """get a job"""
         id = ctx.message.author.id
-        if "job" not in bank[id]:
-            bank[id]["job"] = "unemployed"
+        if "job" not in self.bank[id]:
+            self.bank[id]["job"] = "unemployed"
         if job in jobdict:
-            if jobdict[job] <= bank[id]["power"]:
-                bank[id]["job"] = job
+            if jobdict[job] <= self.bank[id]["power"]:
+                self.bank[id]["job"] = job
                 await ctx.send(embed = await xembed(ctx.message.author.display_name, "Congratulations you're hired! Your new job is: {}".format(job)))
             else:
-                await ctx.send(embed = await xembed(ctx.message.author.display_name,"{} requires {} power and you only have {}!".format(job, jobdict[job], bank[id]["power"])))
+                await ctx.send(embed = await xembed(ctx.message.author.display_name,"{} requires {} power and you only have {}!".format(job, jobdict[job], self.bank[id]["power"])))
         else:
             await ctx.send(embed = await xembed(ctx.message.author.display_name,"{} is not an available job".format(job)))
-        await save()
+        await self.save()
 
 
     async def on_command_error(self, ctx, error):
@@ -182,11 +176,6 @@ class jobs:
             sec = (time%60)
             await ctx.send(embed = await xembed(ctx.author.display_name, "You've been spending too much time at work! Come back in {} minutes and {} seconds".format(int(min), int(sec))))
 
-
-
-async def save():
-    with open('bank.json', 'w') as f:
-        f.write(repr(bank))
 
 async def xembed(title, desc):
     return discord.Embed(title=title, description=desc, color=0xb40a78)
