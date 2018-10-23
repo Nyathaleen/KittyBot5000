@@ -64,7 +64,7 @@ class misc:
         else:
             ctx.send("There aren't that many pages yet!")
 
-    @commands.command(aliases=["dice"])
+    @commands.command()
     async def roll(self, ctx, *, side:int=10):
         """
         Rolls dice, randomly picking a number between 1 and the number of sides
@@ -176,6 +176,14 @@ class misc:
         embed = discord.Embed(title="{},".format(ctx.author.display_name), description="Enjoy your doggos", color=0xb40a78)
         embed.set_image(url=random.choice(dogs))
         await ctx.send(embed = embed)
+
+    @commands.command()
+    async def goat(self, ctx):
+         """Posts a picture of a goat"""
+         goats = ["https://tinyurl.com/ycq3qyj4", "https://tinyurl.com/y9w92md4", "https://tinyurl.com/ybxlusgh", "https://tinyurl.com/y8e6cg7s", "https://tinyurl.com/y9jft3b5", "https://tinyurl.com/yddnc6tr", "https://tinyurl.com/y7lbltyy", "https://tinyurl.com/yags69ou", "https://tinyurl.com/yc439ket", "https://tinyurl.com/y88t5lkx", "https://tinyurl.com/yagppyrj", "https://tinyurl.com/yb95vvqa", "https://tinyurl.com/ybjz4u8y", "https://tinyurl.com/yarq59dy", "https://tinyurl.com/yaca39uh", "https://tinyurl.com/yd9xomad", "https://tinyurl.com/yak84wd4", "https://tinyurl.com/y7u3f6ka", "https://tinyurl.com/y9d8yvwt"]
+         embed = discord.Embed(title=f"{ctx.author.display_name}", description="*Goats!*", colour=0xb40a78)
+         embed.set_image(url=random.choice(goats))
+         await ctx.send(embed = embed)
 
     @commands.command()
     async def slots(self, ctx, num:int = 100):
